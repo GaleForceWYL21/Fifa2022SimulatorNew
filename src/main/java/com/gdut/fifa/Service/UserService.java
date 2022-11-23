@@ -7,7 +7,7 @@ import com.gdut.fifa.Form.RegisterForm;
 
 public interface UserService extends IService<UserEntity> {
 
-    String register(RegisterForm form);
+    int register(RegisterForm form);
 
-    String login(LoginForm form);
+    int login(LoginForm form);
 }

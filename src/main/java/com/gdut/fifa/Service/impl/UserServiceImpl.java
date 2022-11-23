@@ -15,7 +15,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity>implements 
     @Autowired
     private UserDao userDao;
     @Override
-    public String register(RegisterForm form) {
+    public int register(RegisterForm form) {
         int count = 0;
         count = userDao.selectCount(
                 new LambdaQueryWrapper<UserEntity>().
@@ -27,24 +27,21 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity>implements 
             entity.setPassword(form.getPassword());
             entity.setUsername(form.getUsername());
             userDao.insert(entity);
-            return "注册成功";
+            return 1;
         }
-        return "用户名重复，请换一个";
+        return 0;
     }
 
     @Override
-    public String login(LoginForm form) {
+    public int login(LoginForm form) {
         int count = userDao.selectCount(new LambdaQueryWrapper<UserEntity>()
                 .eq(UserEntity::getUsername, form.getUsername())
                 .eq(UserEntity::getPassword, form.getPassword())).intValue();
         int userCount = userDao.selectCount(new LambdaQueryWrapper<UserEntity>()
                 .eq(UserEntity::getUsername, form.getUsername())).intValue();
-        if (count == 1) {
-            return "登录成功";
-        } else if (userCount != 0) {
-            return "密码错误";
-        }
-        return "账号不存在，请先注册";
+        if (count == 1) return 1;
+        if (userCount != 0) return 0;
+        return 2;
     }
 }
 
