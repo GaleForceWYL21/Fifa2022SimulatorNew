@@ -19,14 +19,14 @@ public class FifaController {
     @PostMapping("/register")
     public R register(@RequestBody RegisterForm form){
         int code = userService.register(form);
-        if(code == 1)return R.ok("注册成功");
+        if(code == 1)return R.ok(500,"注册成功");
         return R.error("用户名重复，请换一个");
     }
 
     @PostMapping("/login")
     public R login(@RequestBody LoginForm form){
         int code = userService.login(form);
-        if(code == 1)return R.ok("登录成功");
+        if(code == 1)return R.ok(500,"登录成功");
         if(code == 0)return R.error("密码错误");
         return R.error("账户不存在，请先注册");
     }
