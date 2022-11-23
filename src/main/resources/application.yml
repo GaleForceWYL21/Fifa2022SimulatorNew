@@ -1,0 +1,10 @@
+server:
+  port: 31180
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://1.12.66.68:3306/bet?serverTimezone=UTC
+    username: root
+    password: wyn0818
+    type: com.alibaba.druid.pool.DruidDataSource
