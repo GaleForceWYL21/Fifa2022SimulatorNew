@@ -51,6 +51,13 @@ public class FifaController {
         return R.error("场次信息不存在");
     }
 
+    //free coin for each match
+    @GetMapping("/freeCoin")
+    public R freeCoin(@RequestParam("id") int id, @RequestParam("username") String username){
+        int count = userService.freeCoin(id,username);
+        if(count == 1)return R.ok(500,"领取成功");
+        return R.error("不可重复领取");
+    }
 
 
 }

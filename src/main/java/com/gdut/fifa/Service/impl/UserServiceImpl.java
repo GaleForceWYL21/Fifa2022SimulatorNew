@@ -2,12 +2,8 @@ package com.gdut.fifa.Service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.gdut.fifa.Dao.MatchDao;
-import com.gdut.fifa.Dao.MatchInfoDao;
-import com.gdut.fifa.Dao.UserDao;
-import com.gdut.fifa.Entity.MatchEntity;
-import com.gdut.fifa.Entity.MatchInfoEntity;
-import com.gdut.fifa.Entity.UserEntity;
+import com.gdut.fifa.Dao.*;
+import com.gdut.fifa.Entity.*;
 import com.gdut.fifa.Form.LoginForm;
 import com.gdut.fifa.Form.RegisterForm;
 import com.gdut.fifa.Service.UserService;
@@ -26,6 +22,12 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity>implements 
 
     @Autowired
     private MatchInfoDao matchInfoDao ;
+
+    @Autowired
+    private FreeCoinDao freeCoinDao ;
+
+    @Autowired
+    private UserInfoDao userInfoDao;
 
     @Override
     public int register(RegisterForm form) {
@@ -70,6 +72,34 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity>implements 
                 new LambdaQueryWrapper<MatchInfoEntity>()
                         .eq(MatchInfoEntity::getId,id)
         );
+    }
+
+    @Override
+    public int freeCoin(int id, String username) {
+        int count = freeCoinDao.selectCount(
+                new LambdaQueryWrapper<FreeCoinEntity>()
+                        .eq(FreeCoinEntity::getMid,id)
+                        .eq(FreeCoinEntity::getUsername,username)
+        ).intValue();
+        if(count == 0){
+            FreeCoinEntity freeCoinEntity = new FreeCoinEntity();
+            UserInfoEntity entity = userInfoDao.selectOne(
+                    new LambdaQueryWrapper<UserInfoEntity>()
+                            .eq(UserInfoEntity::getUsername,username)
+            );
+            //set point receive info of this match to db
+            freeCoinEntity.setMid(id);
+            freeCoinEntity.setUsername(username);
+            freeCoinDao.insert(freeCoinEntity);
+            //set point to the user account
+            entity.setGetFree(entity.getGetFree()+1);
+            entity.setPoint(entity.getPoint()+10000);
+            userInfoDao.update(entity,new LambdaQueryWrapper<UserInfoEntity>()
+                    .eq(UserInfoEntity::getUsername,username));
+            return 1;
+        }
+        //if user already receive the free coin of this match
+        return 0;
     }
 }
 

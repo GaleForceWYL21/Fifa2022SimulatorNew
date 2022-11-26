@@ -19,4 +19,5 @@ public interface UserService extends IService<UserEntity> {
 
     List<MatchInfoEntity> matchInfo(int id);
 
+    int freeCoin(int id, String username);
 }

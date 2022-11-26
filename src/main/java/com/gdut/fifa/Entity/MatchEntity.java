@@ -13,7 +13,10 @@ import java.util.Date;
 public class MatchEntity {
     @TableId(value = "matchId")
     private int id;
-    private String name;
+    private String home;
+    private String away;
+    private int homePoint;
+    private int awayPoint;
     private String info;
     private Date time;
 }
