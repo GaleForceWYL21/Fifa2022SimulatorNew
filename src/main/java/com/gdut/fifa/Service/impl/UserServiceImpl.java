@@ -4,12 +4,18 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.gdut.fifa.Dao.*;
 import com.gdut.fifa.Entity.*;
+import com.gdut.fifa.Form.BettingForm;
 import com.gdut.fifa.Form.LoginForm;
 import com.gdut.fifa.Form.RegisterForm;
 import com.gdut.fifa.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 
+import javax.xml.crypto.Data;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -28,6 +34,9 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity>implements 
 
     @Autowired
     private UserInfoDao userInfoDao;
+
+    @Autowired
+    private BetInfoDao betInfoDao;
 
     @Override
     public int register(RegisterForm form) {
@@ -100,6 +109,68 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity>implements 
         }
         //if user already receive the free coin of this match
         return 0;
+    }
+
+    @Override
+    public int betting(BettingForm form) {
+        Date Utime = new Date();
+        Long formatTime = Utime.getTime()/1000*1000;
+        Date time = new Date(formatTime);
+        SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        //examine whether betting time exceeded
+        MatchEntity timeEntity = matchDao.selectOne(
+                new LambdaQueryWrapper<MatchEntity>()
+                        .eq(MatchEntity::getId,form.getMatch())
+        );
+        //if time exceeded ,returns
+        if(time.compareTo(timeEntity.getTime())>=0){
+            return -1;
+        }
+
+        //examine if user have enough coin to bet
+        UserInfoEntity moneyEntity = userInfoDao.selectOne(
+                new LambdaQueryWrapper<UserInfoEntity>()
+                        .eq(UserInfoEntity::getUsername,form.getUsername())
+        );
+
+        ////if balance is not enough to bet
+        if(moneyEntity.getPoint() < form.getCoin()){
+            return -2;
+        }
+
+        //if balance is enough to bet
+        //deducting the balance
+        moneyEntity.setPoint(moneyEntity.getPoint() -form.getCoin());
+        userInfoDao.update(moneyEntity,new LambdaQueryWrapper<UserInfoEntity>()
+                .eq(UserInfoEntity::getUsername,moneyEntity.getUsername())
+        );
+
+        //record bet info in normal
+        BetInfoEntity entity = new BetInfoEntity();
+        entity.setMatchid(form.getMatch());
+        entity.setScoreinfo(form.getBetInfo());
+        entity.setUsername(form.getUsername());
+        entity.setPoint(form.getCoin());
+        entity.setOdds(form.getBetPoint());
+        entity.setTime(time);
+        betInfoDao.insert(entity);
+
+        //return id of a successful bet
+        BetInfoEntity curEntity = betInfoDao.selectOne(new LambdaQueryWrapper<BetInfoEntity>()
+                .eq(BetInfoEntity::getUsername,form.getUsername())
+                .eq(BetInfoEntity::getTime,format1.format(time))
+                .eq(BetInfoEntity::getMatchid,form.getMatch()));
+        return curEntity.getId();
+//        if(curEntity.get(12).getTime().equals(time)) return 2;
+//        return 1;
+    }
+
+    @Override
+    public List<BetInfoEntity> bettingInfo(String username) {
+        return betInfoDao.selectList(
+                new LambdaQueryWrapper<BetInfoEntity>()
+                        .eq(BetInfoEntity::getUsername,username)
+        );
     }
 }
 
