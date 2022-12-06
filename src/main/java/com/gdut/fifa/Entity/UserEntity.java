@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 @Alias("UserEntity")
 @Data
-@TableName("user")
+@TableName("bet.user")
 public class UserEntity implements Serializable {
     @TableId
     private String username;

@@ -38,7 +38,7 @@ public class FifaController {
     //get match basic info
     @GetMapping("/match")
     public R match(){
-        return R.ok(userService.match());
+        return R.ok(500,userService.match());
     }
 
     //get match betting info
@@ -72,6 +72,24 @@ public class FifaController {
     @GetMapping("/bettingInfo")
     public R bettingInfo(@RequestParam("username")String username){
         return R.ok(500,userService.bettingInfo(username));
+    }
+
+    //show personal detail
+    @GetMapping("/personal")
+    public R personal(@RequestParam("username")String username){
+        return R.ok(500,userService.personal(username));
+    }
+
+    //current betting for each match
+    @GetMapping("/currentBetting")
+    public R currentBetting(@RequestParam("matchId")Integer match){
+        return R.ok(500,userService.currentBetting(match));
+    }
+
+    //top 10 of the game
+    @GetMapping("/top10")
+    public R top10(){
+        return R.ok(500,userService.top10());
     }
 
 

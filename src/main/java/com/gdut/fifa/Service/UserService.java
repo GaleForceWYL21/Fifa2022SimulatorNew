@@ -1,10 +1,9 @@
 package com.gdut.fifa.Service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.gdut.fifa.Entity.BetInfoEntity;
-import com.gdut.fifa.Entity.MatchEntity;
-import com.gdut.fifa.Entity.MatchInfoEntity;
-import com.gdut.fifa.Entity.UserEntity;
+import com.gdut.fifa.Entity.*;
+import com.gdut.fifa.Entity.Vo.PersonInfo;
+import com.gdut.fifa.Entity.Vo.PersonInfo;
 import com.gdut.fifa.Form.BettingForm;
 import com.gdut.fifa.Form.LoginForm;
 import com.gdut.fifa.Form.RegisterForm;
@@ -27,4 +26,11 @@ public interface UserService extends IService<UserEntity> {
 
 
     List<BetInfoEntity> bettingInfo(String username);
+
+    List<PersonInfo> personal(String username);
+
+    List<BetInfoEntity> currentBetting(Integer match);
+
+    List<UserInfoEntity> top10();
+
 }

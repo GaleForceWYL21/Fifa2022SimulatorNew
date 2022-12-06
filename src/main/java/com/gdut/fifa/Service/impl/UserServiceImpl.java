@@ -1,9 +1,12 @@
 package com.gdut.fifa.Service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.gdut.fifa.Dao.*;
 import com.gdut.fifa.Entity.*;
+import com.gdut.fifa.Entity.Vo.PersonInfo;
+import com.gdut.fifa.Entity.Vo.PersonInfo;
 import com.gdut.fifa.Form.BettingForm;
 import com.gdut.fifa.Form.LoginForm;
 import com.gdut.fifa.Form.RegisterForm;
@@ -46,11 +49,21 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity>implements 
                         eq(UserEntity::getUsername,form.getUsername())
         ).intValue();
         if(count ==0){
+            //create basic user info
             UserEntity entity = new UserEntity();
             entity.setNickname(form.getNickname());
             entity.setPassword(form.getPassword());
             entity.setUsername(form.getUsername());
             userDao.insert(entity);
+
+            //create detail of this user
+            UserInfoEntity userEntity = new UserInfoEntity();
+            userEntity.setUsername(form.getUsername());
+            userEntity.setRace(0);
+            userEntity.setGetFree(0);
+            userEntity.setPoint(0);
+            userEntity.setWinPoint(0);
+            userInfoDao.insert(userEntity);
             return 1;
         }
         return 0;
@@ -153,7 +166,17 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity>implements 
         entity.setPoint(form.getCoin());
         entity.setOdds(form.getBetPoint());
         entity.setTime(time);
+        entity.setState("pending");
         betInfoDao.insert(entity);
+
+        //update bet times to user info
+        UserInfoEntity infoEntity = userInfoDao.selectOne(
+                new LambdaQueryWrapper<UserInfoEntity>()
+                        .eq(UserInfoEntity::getUsername,form.getUsername())
+        );
+        infoEntity.setRace(infoEntity.getRace()+1);
+        userInfoDao.update(infoEntity,new LambdaQueryWrapper<UserInfoEntity>()
+                .eq(UserInfoEntity::getUsername,form.getUsername()));
 
         //return id of a successful bet
         BetInfoEntity curEntity = betInfoDao.selectOne(new LambdaQueryWrapper<BetInfoEntity>()
@@ -171,6 +194,27 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity>implements 
                 new LambdaQueryWrapper<BetInfoEntity>()
                         .eq(BetInfoEntity::getUsername,username)
         );
+    }
+
+    @Override
+    public List<PersonInfo> personal(String username) {
+        return userInfoDao.personal(username);
+    }
+
+    @Override
+    public List<BetInfoEntity> currentBetting(Integer match) {
+        return betInfoDao.selectList(
+                new LambdaQueryWrapper<BetInfoEntity>()
+                        .eq(BetInfoEntity::getMatchid,match)
+                        .orderByDesc(BetInfoEntity::getTime)
+                        .last("limit 6")
+
+        );
+    }
+
+    @Override
+    public List<UserInfoEntity> top10() {
+        return userInfoDao.top10();
     }
 }
 

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gdut.fifa.Dao.UserInfoDao">
+<!--    <resultMap id="UserInfoMap" type="UserInfoEntity">-->
+<!--</resultMap>-->
+    <select id="personal" resultType="PersonInfo">
+        select
+            user_info.*,
+            get_free*10000 as getFreeCoin,
+            point/get_free as winRate
+        from user_info
+        where username = '123';
+    </select>
+
+    <select id="top10" resultType="TopInfoVo">
+        select
+            nickname,
+            race,
+            point,
+            win_point as winPoint,
+            race*10000 as getFreeCoin,
+            convert(win_point/(race*10000), decimal (12,2)) as winRate
+        from user_info join user on user.username = user_info.username
+        where race > 0;
+    </select>
+
+
+</mapper>
